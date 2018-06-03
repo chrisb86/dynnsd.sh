@@ -1,0 +1,21 @@
+## /usr/local/etc/dynnsd.d/dyn.example.com.zone.dist
+
+## The domain that you want to update
+SUBDOMAIN="dyn.example.com"
+
+## The secret to authenticate you
+PASS="gzqtrfqdX8xin7Pg&fdqmne8gyxddasggw+x]W)Urbx{hpbrpW"
+
+## The hosts to query for updating your NS records
+## Uncomment UPDATE6 and put in the URL that can be only resolved via IPv6.
+UPDATE="4.update.exapmple"
+# UPDATE6="6.update.example.com"
+
+## The TTL of the record
+TTL=3600
+
+## The logfile of the virtual server that should be monitored
+LOG="/usr/local/www/update.example.com/logs/access.log"
+
+## The zone file that you want to update
+ZONEFILE=dyn.example.com.zone
