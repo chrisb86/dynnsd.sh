@@ -29,8 +29,6 @@
 CONF_DIR="/usr/local/etc/dynnsd.d"
 LAST_IP="none"
 LAST_IP6="none"
-LAST_IP_FILE=.lastip.$SUBDOMAIN
-LAST_IP6_FILE=.lastip6.$SUBDOMAIN
 TTL=3600
 
 cd $CONF_DIR
@@ -39,6 +37,9 @@ cd $CONF_DIR
 for f in *.conf
 do
   . $f
+
+  LAST_IP_FILE=.lastip.$SUBDOMAIN
+  LAST_IP6_FILE=.lastip6.$SUBDOMAIN
 
   ## IPv4
   if [ -n "$UPDATE" ]; then
