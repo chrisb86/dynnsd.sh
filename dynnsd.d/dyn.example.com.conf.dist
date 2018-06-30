@@ -17,5 +17,6 @@ TTL=3600
 ## The logfile of the virtual server that should be monitored
 LOG="/usr/local/www/update.example.com/logs/access.log"
 
-## The zone file that you want to update
+## The zone files that you want to update
 ZONEFILE=dyn.example.com.zone
+MAIN_ZONEFILE=/usr/local/nsd/zones/example.com.zone

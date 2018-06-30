@@ -21,7 +21,7 @@ zone:
         zonefile: /usr/local/etc/nsd/zones/example.com
 ```
 ### /usr/local/etc/nsd/zones/example.com
-This is a pretty standard zone file. It serves example.com and the hosts that we need to update the NS records. In the last line we include the zone file for the dynamic host.
+This is a pretty standard zone file. It serves example.com and the hosts that we need to update the NS records. In the last line we include the zone file for the dynamic host. In the script we call it _$MAIN_ZONEFILE_.
 ```
 ; example.com
 $ORIGIN example.com.
@@ -113,8 +113,10 @@ UPDATE6="update6.example.com"
 ## The logfile of the virtual server that should be monitored
 LOG="/usr/local/www/update.example.com/logs/nginx.access.log"
 
-## The zone file that you want to update
+## The zone files that you want to update
 ZONEFILE="/usr/local/etc/nsd/zones/dyn/dyn.example.com"
+MAIN_ZONEFILE="/usr/local/nsd/zones/example.com.zone"
+
 ```
 
 ## The cron jobs
