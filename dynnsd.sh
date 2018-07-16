@@ -82,6 +82,7 @@ do
   HAS_CHANGES=FALSE
   . $f
 
+  echo "$(date) Processing config file for $SUBDOMAIN."
   # Files to store the last IPs
   LAST_IP_FILE=".lastip.$SUBDOMAIN"
   LAST_IP6_FILE=".lastip6.$SUBDOMAIN"
@@ -95,15 +96,14 @@ do
     # Get the last stored IP if there's one
   	if [ -f $LAST_IP_FILE ]; then
   	  LAST_IP=$(cat $LAST_IP_FILE)
-
   	fi
-
     # If IP has changed, store the new IP
   	if [ $LAST_IP != $REQ_IP ]; then
-  	  echo $REQ_IP > $LAST_IP_FILE
-      $REQ_IP=$LAST_IP
+      echo "Last IP: $LAST_IP, new IP: $REQ_IP."
+      # Update IP storage file
+      echo $REQ_IP > $LAST_IP_FILE
+      LAST_IP=$REQ_IP
   	  HAS_CHANGES=TRUE
-      RELOAD_NSD=TRUE
   	fi
   fi
 
@@ -120,27 +120,31 @@ do
 
     # If IP has changed, store the new IP
   	if [ $LAST_IP6 != $REQ_IP6 ]; then
-  	  echo $REQ_IP6 > $LAST_IP6_FILE
-      $REQ_IP6=$LAST_IP6
+      echo "Last IP: $LAST_IP6, new IP: $REQ_IP6."
+      # Update IP storage file
+      echo $REQ_IP6 > $LAST_IP6_FILE
+      LAST_IP6=$REQ_IP6
   	  HAS_CHANGES=TRUE
-      RELOAD_NSD=TRUE
   	fi
   fi
 
-  # Write IPs to temporary zone file and move it to actual zone file
-  echo "$SUBDOMAIN $TTL IN AAAA $LAST_IP6" >> $ZONEFILE.tmp
-  echo "$SUBDOMAIN $TTL IN A $LAST_IP" >> $ZONEFILE.tmp
-  mv $ZONEFILE.tmp $ZONEFILE
+  # If there are changed IPs...
+  if [ "$HAS_CHANGES" = "TRUE" ]; then
+    # Write IPs to temporary zone file and move it to actual zone file
+    echo "Updating zone file for $SUBDOMAIN."
+    echo "$SUBDOMAIN $TTL IN AAAA $LAST_IP6" >> $ZONEFILE.tmp
+    echo "$SUBDOMAIN $TTL IN A $LAST_IP" >> $ZONEFILE.tmp
+    mv $ZONEFILE.tmp $ZONEFILE
 
-  # If IPs have changed, update main zone file
-  if [ -n "$HAS_CHANGES" ]; then
+    # If IPs have changed, update main zone file
+    echo "Updating main zone file $MAIN_ZONEFILE."
   	main_zone_update_serial $MAIN_ZONEFILE
+    RELOAD_NSD=TRUE
   fi
-
 done
 
 # If zones have changes, reload nsd and notify slaves
-if [ -n "$RELOAD_NSD" ]; then
-	nsd-control reload
-	nsd-control notify
+if [ "$RELOAD_NSD" = "TRUE" ]; then
+  echo "nsd-control reload: " && nsd-control reload
+	echo "nsd-control notify: " && nsd-control notify
 fi
