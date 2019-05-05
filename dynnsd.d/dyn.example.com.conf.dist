@@ -8,7 +8,7 @@ PASS="gzqtrfqdX8xin7Pg&fdqmne8gyxddasggw+x]W)Urbx{hpbrpW"
 
 ## The hosts to query for updating your NS records
 ## Uncomment UPDATE6 and put in the URL that can be only resolved via IPv6.
-UPDATE="4.update.exapmple"
+UPDATE="4.update.example"
 # UPDATE6="6.update.example.com"
 
 ## The TTL of the record

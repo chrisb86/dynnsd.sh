@@ -27,9 +27,6 @@
 
 ## Set some defaults
 CONF_DIR="/usr/local/etc/dynnsd.d"
-LAST_IP="none"
-LAST_IP6="none"
-TTL=3600
 
 # Update the serial of a zone file
 main_zone_update_serial() {
@@ -72,20 +69,20 @@ main_zone_update_serial() {
     /usr/bin/sed -i -e "s/${SERIAL}/${NEWSERIAL}/g" ${ZONE}
 }
 
-## Make the magic happen
-cd $CONF_DIR
-
 # Loop through configs
-for f in *.conf
+for f in $CONF_DIR/*.conf
 do
   # Reset changes toggle
   HAS_CHANGES=FALSE
+  LAST_IP="none"
+  LAST_IP6="none"
+  TTL=3600
   . $f
 
   echo "$(date) Processing config file for $SUBDOMAIN."
   # Files to store the last IPs
-  LAST_IP_FILE=".lastip.$SUBDOMAIN"
-  LAST_IP6_FILE=".lastip6.$SUBDOMAIN"
+  LAST_IP_FILE="$CONF_DIR/.lastip.$SUBDOMAIN"
+  LAST_IP6_FILE="$CONF_DIR/.lastip6.$SUBDOMAIN"
 
   ## IPv4
   if [ -n "$UPDATE" ]; then
@@ -115,7 +112,7 @@ do
 
     # Get the last stored IP if there's one
   	if [ -f $LAST_IP6_FILE ]; then
-  	  LAST_IP6=$(cat $LAST_IP6_FILE)
+      LAST_IP6=$(cat $LAST_IP6_FILE)
   	fi
 
     # If IP has changed, store the new IP
@@ -131,11 +128,15 @@ do
   # If there are changed IPs...
   if [ "$HAS_CHANGES" = "TRUE" ]; then
     # Write IPs to temporary zone file and move it to actual zone file
-    echo "Updating zone file for $SUBDOMAIN."
-    echo "$SUBDOMAIN $TTL IN AAAA $LAST_IP6" >> $ZONEFILE.tmp
-    echo "$SUBDOMAIN $TTL IN A $LAST_IP" >> $ZONEFILE.tmp
-    mv $ZONEFILE.tmp $ZONEFILE
+    echo "Updating zone file $ZONEFILE for $SUBDOMAIN."
 
+    if [ -n "$UPDATE" ]; then
+      echo "$SUBDOMAIN $TTL IN A $LAST_IP" >> $ZONEFILE.tmp
+    fi
+    if [ -n "$UPDATE6" ]; then
+      echo "$SUBDOMAIN $TTL IN AAAA $LAST_IP6" >> $ZONEFILE.tmp
+    fi
+    mv $ZONEFILE.tmp $ZONEFILE
     # If IPs have changed, update main zone file
     echo "Updating main zone file $MAIN_ZONEFILE."
   	main_zone_update_serial $MAIN_ZONEFILE
